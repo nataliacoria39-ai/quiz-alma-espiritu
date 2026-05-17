@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Premium - El Alma y el Espíritu</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 20px;
+      animation: fadeIn 1s ease;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+
+    .question {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      animation: slideUp 0.6s ease;
+    }
+
+    .question h3 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .options button {
+      border: none;
+      padding: 18px;
+      border-radius: 18px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+      color: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .options button:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .true-btn {
+      background: linear-gradient(135deg, #00c853, #00e676);
+    }
+
+    .false-btn {
+      background: linear-gradient(135deg, #ff1744, #ff5252);
+    }
+
+    .correct {
+      background: linear-gradient(135deg, #00e676, #69f0ae) !important;
+    }
+
+    .incorrect {
+      background: linear-gradient(135deg, #d50000, #ff1744) !important;
+    }
+
+    .finish-btn {
+      width: 100%;
+      padding: 20px;
+      border: none;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ff9800, #ffc107);
+      color: #222;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .finish-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .result {
+      margin-top: 35px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 25px;
+      padding: 35px;
+      text-align: center;
+      display: none;
+      animation: fadeIn 1s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .result h2 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .emoji {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media(max-width: 700px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bgMusic" autoplay loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=upbeat-funk-pop-113869.mp3" type="audio/mpeg">
+</audio>
+
+<button onclick="toggleMusic()" id="musicBtn" style="position:fixed;top:15px;right:15px;z-index:999;padding:12px 18px;border:none;border-radius:15px;background:#ffffff;color:#222;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+🎵 Música: ON
+</button>
+
+<div class="container">
+  <div class="header">
+    <h1>🏆 QUIZ PREMIUM</h1>
+    <p>El Alma, el Espíritu y la Vida de los Cuerpos</p>
+    <div style="margin-top:10px;font-size:1rem;opacity:0.9;">
+      📖 Basado en el libro <strong>Conócete a ti Mismo</strong><br>
+      ✍️ Joaquín Trincado Mate
+    </div>
+    <div id="timer" style="font-size:1.4rem;margin-top:15px;font-weight:bold;">⏱ Tiempo: 05:00</div>
+    <div style="margin-top:15px;">
+      <progress id="progressBar" value="0" max="15" style="width:100%;height:18px;border-radius:10px;"></progress>
+    </div>
+  </div>
+  <h1>Quiz Interactivo</h1>
+  <div class="subtitle">El Alma, el Espíritu y la Vida de los Cuerpos</div>
+
+  <div id="quiz"></div>
+
+  <button class="finish-btn" onclick="showResult()">Finalizar Quiz</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+const explanations = [
+  'El texto afirma que el alma no es la causa del pensamiento del hombre.',
+  'Según el libro, el alma tiene vida natural y material.',
+  'El espíritu es presentado como superior al alma en sensibilidad y conciencia.',
+  'El cuerpo humano es considerado temporal pero parte de un proceso eterno.',
+  'El hombre debe dominar sus especies internas para vivir en la ley del espíritu.'
+];
+
+const questions = [
+  {
+    q: "Según el texto, el alma es la causa del pensamiento del hombre.",
+    answer: false
+  },
+  {
+    q: "El texto afirma que el alma humana tiene solamente vida natural.",
+    answer: true
+  },
+  {
+    q: "El espíritu y el alma son exactamente la misma cosa.",
+    answer: false
+  },
+  {
+    q: "Los animales sienten, pero no razonan.",
+    answer: true
+  },
+  {
+    q: "El raciocinio es presentado como una diferencia entre el hombre y otros seres.",
+    answer: true
+  },
+  {
+    q: "El texto dice que todas las almas poseen la misma sensibilidad.",
+    answer: false
+  },
+  {
+    q: "El alma más pura se acerca más al espíritu.",
+    answer: true
+  },
+  {
+    q: "El espíritu puede perder su naturaleza espiritual.",
+    answer: false
+  },
+  {
+    q: "El cuerpo del hombre es considerado más temporal que el alma.",
+    answer: true
+  },
+  {
+    q: "El texto sostiene que el cuerpo humano desaparece completamente sin dejar esencia alguna.",
+    answer: false
+  },
+  {
+    q: "Según el texto, el alma del hombre tuvo que animar otros cuerpos antes del cuerpo humano.",
+    answer: true
+  },
+  {
+    q: "El hombre debe dominar todas las especies para descubrir su trinidad.",
+    answer: true
+  },
+  {
+    q: "El texto afirma que el alma humana es inteligente por naturaleza.",
+    answer: false
+  },
+  {
+    q: "El espíritu puede representar mundos que ya no existen.",
+    answer: true
+  },
+  {
+    q: "El texto sostiene que todos los seres siguen una misma ley universal.",
+    answer: true
+  }
+];
+
+const quizDiv = document.getElementById('quiz');
+const progressBar = document.getElementById('progressBar');
+
+let timeLeft = 300;
+const timer = document.getElementById('timer');
+
+const countdown = setInterval(() => {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  timer.innerHTML = `⏱ Tiempo: ${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+
+  if(timeLeft <= 0){
+    clearInterval(countdown);
+    showResult();
+  }
+
+  timeLeft--;
+},1000);
+let score = 0;
+let answeredCount = 0;
+let answered = Array(questions.length).fill(false);
+
+questions.forEach((item, index) => {
+  const div = document.createElement('div');
+  div.className = 'question';
+
+  div.innerHTML = `
+    <h3>${index + 1}. ${item.q}</h3>
+    <div class="options">
+      <button class="true-btn" onclick="answerQuestion(${index}, true, this)">Verdadero</button>
+      <button class="false-btn" onclick="answerQuestion(${index}, false, this)">Falso</button>
+    </div>
+  `;
+
+  quizDiv.appendChild(div);
+});
+
+function answerQuestion(index, selected, button) {
+  if(answered[index]) return;
+
+  answered[index] = true;
+
+  const correct = questions[index].answer;
+  const buttons = button.parentElement.querySelectorAll('button');
+  const questionBox = button.closest('.question');
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  const feedback = document.createElement('div');
+  feedback.style.marginTop = '15px';
+  feedback.style.fontSize = '1.1rem';
+  feedback.style.fontWeight = 'bold';
+  feedback.style.textAlign = 'center';
+
+  if(selected === correct) {
+    button.classList.add('correct');
+    feedback.innerHTML = `✅ ¡Correcto!<br><div style="margin-top:8px;font-size:0.95rem;font-weight:normal;">${explanations[index] || ''}</div>`;
+    score++;
+  } else {
+    button.classList.add('incorrect');
+    feedback.innerHTML = `❌ Incorrecto<br><div style="margin-top:8px;font-size:0.95rem;font-weight:normal;">${explanations[index] || ''}</div>`;
+
+    buttons.forEach(btn => {
+      if((btn.innerText === 'Verdadero' && correct) ||
+         (btn.innerText === 'Falso' && !correct)) {
+        btn.classList.add('correct');
+      }
+    });
+  }
+
+  questionBox.appendChild(feedback);
+
+  answeredCount++;
+  progressBar.value = answeredCount;
+
+  if(answeredCount === questions.length){
+    setTimeout(showResult, 800);
+  }
+}
+
+function showResult() {
+  clearInterval(countdown);
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.style.display = 'block';
+
+  let message = '';
+  let emoji = '📚';
+  let percentage = Math.round((score / questions.length) * 100);
+
+  if(score >= 13) {
+    emoji = '🏆';
+    message = '¡Excelente trabajo! Dominas el tema.';
+  } else if(score >= 8) {
+    emoji = '🎉';
+    message = '¡Muy bien! Sigue aprendiendo.';
+  } else {
+    emoji = '💡';
+    message = 'Puedes volver a intentarlo para mejorar.';
+  }
+
+  resultDiv.innerHTML = `
+    <div class="emoji">${emoji}</div>
+    <h2>${score} / ${questions.length}</h2>
+    <h3>${percentage}% de respuestas correctas</h3>
+    <p>${message}</p>
+    <button onclick="location.reload()" style="margin-top:20px;padding:15px 25px;border:none;border-radius:15px;font-size:1rem;font-weight:bold;cursor:pointer;">🔄 Reintentar Quiz</button>
+  `;
+
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+function toggleMusic(){
+  const music = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+
+  if(music.paused){
+    music.play();
+    btn.innerHTML = '🎵 Música: ON';
+  } else {
+    music.pause();
+    btn.innerHTML = '🔇 Música: OFF';
+  }
+}
+</script>
+
+</body>
+</html>
